@@ -1,8 +1,7 @@
 pipeline {
     agent any
-
     environment {
-        DOCKER_IMAGE = "naveen04jan/my-python-app"
+        DOCKER_IMAGE = "my-python-app5"
         DOCKER_TAG = "latest"
     }
 
