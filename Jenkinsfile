@@ -1,8 +1,7 @@
 pipeline {
     agent any
     
-    environment {
-        // Replace 'your-dockerhub-username' with your actual username
+    environment{
         DOCKER_USER  = 'ananya622'
         IMAGE_NAME   = 'my-python-app5'
         IMAGE_TAG    = "${env.BUILD_NUMBER}"
@@ -12,7 +11,7 @@ pipeline {
     stages {
         stage('Build Docker Image') {
             steps {
-                // Build with both a specific tag and the 'latest' tag
+              
                 sh "docker build -t ${FULL_IMAGE}:${IMAGE_TAG} -t ${FULL_IMAGE}:latest ."
             }
         }
