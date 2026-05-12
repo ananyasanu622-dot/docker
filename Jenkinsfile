@@ -1,15 +1,19 @@
 pipeline {
     agent any
+    
     environment {
-        DOCKER_IMAGE = "my-python-app5"
-        DOCKER_TAG = "latest"
+        // Replace 'your-dockerhub-username' with your actual username
+        DOCKER_USER  = 'ananya622'
+        IMAGE_NAME   = 'my-python-app5'
+        IMAGE_TAG    = "${env.BUILD_NUMBER}"
+        FULL_IMAGE   = "${DOCKER_USER}/${IMAGE_NAME}"
     }
 
     stages {
-
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE:$DOCKER_TAG .'
+                // Build with both a specific tag and the 'latest' tag
+                sh "docker build -t ${FULL_IMAGE}:${IMAGE_TAG} -t ${FULL_IMAGE}:latest ."
             }
         }
 
@@ -27,18 +31,30 @@ pipeline {
 
         stage('Push Image') {
             steps {
-                sh 'docker push $DOCKER_IMAGE:$DOCKER_TAG'
+                sh "docker push ${FULL_IMAGE}:${IMAGE_TAG}"
+                sh "docker push ${FULL_IMAGE}:latest"
             }
         }
 
         stage('Deploy Container') {
             steps {
-                sh '''
+                // Using double quotes for Groovy variable interpolation
+                sh """
                 docker stop myapp-container || true
                 docker rm myapp-container || true
-                docker run -d -p 5000:5000 --name myapp-container $DOCKER_IMAGE:$DOCKER_TAG
-                '''
+                docker run -d -p 5000:5000 --name myapp-container ${FULL_IMAGE}:latest
+                """
             }
+        }
+    }
+
+    post {
+        always {
+            // Logout to keep the agent secure
+            sh 'docker logout'
+        }
+        success {
+            echo "Deployment of ${FULL_IMAGE}:${IMAGE_TAG} was successful!"
         }
     }
 }
